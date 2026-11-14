@@ -20,3 +20,4 @@ test-cancel/
 run.out
 run.err
 *.log
+signing/application-draft.md
