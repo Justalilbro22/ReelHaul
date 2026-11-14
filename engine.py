@@ -69,6 +69,11 @@ def packaged_dirs() -> list[str]:
         exe_dir = os.path.dirname(sys.executable)
         if exe_dir:
             candidates.append(exe_dir)
+            # A plain PyInstaller build (dist\TubeGrab) keeps the bundled tools
+            # in the repo root next to dist\, so search up one level too.
+            parent = os.path.dirname(exe_dir)
+            if parent:
+                candidates.append(parent)
     candidates.append(os.path.dirname(os.path.abspath(__file__)))
     seen: set[str] = set()
     unique: list[str] = []
