@@ -70,10 +70,13 @@ def packaged_dirs() -> list[str]:
         if exe_dir:
             candidates.append(exe_dir)
             # A plain PyInstaller build (dist\TubeGrab) keeps the bundled tools
-            # in the repo root next to dist\, so search up one level too.
+            # in the repo root next to dist\, so search two levels up too.
             parent = os.path.dirname(exe_dir)
             if parent:
                 candidates.append(parent)
+                grandparent = os.path.dirname(parent)
+                if grandparent:
+                    candidates.append(grandparent)
     candidates.append(os.path.dirname(os.path.abspath(__file__)))
     seen: set[str] = set()
     unique: list[str] = []
@@ -197,6 +200,21 @@ def strip_ansi(text: str) -> str:
 def _clean_error(exc: BaseException) -> str:
     text = strip_ansi(str(exc)).strip()
     return text or exc.__class__.__name__
+
+
+_BOT_MARKERS = (
+    "not a bot",
+    "sign in to confirm",
+    "use --cookies",
+    "cookies-from-browser",
+)
+
+
+def is_bot_check(exc_or_text: Union[BaseException, str]) -> bool:
+    """True when YouTube refused us because of a datacenter/anonymous IP."""
+    raw = _clean_error(exc_or_text) if isinstance(exc_or_text, BaseException) else str(exc_or_text)
+    low = strip_ansi(raw).lower()
+    return any(marker in low for marker in _BOT_MARKERS)
 
 
 def friendly_error(exc_or_text: Union[BaseException, str]) -> str:

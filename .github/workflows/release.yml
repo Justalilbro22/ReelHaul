@@ -47,6 +47,13 @@ jobs:
       - name: Package the app
         run: pyinstaller --noconfirm --clean TubeGrab.spec
 
+      - name: Stage bundled tools into the build (installer layout)
+        shell: pwsh
+        run: |
+          Copy-Item bundled/ytdlp   dist/TubeGrab/ytdlp   -Recurse -Force
+          Copy-Item bundled/runtime dist/TubeGrab/runtime -Recurse -Force
+          Copy-Item bundled/ffmpeg  dist/TubeGrab/ffmpeg  -Recurse -Force
+
       - name: Self-test the build
         shell: pwsh
         run: |
