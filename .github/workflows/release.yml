@@ -4,6 +4,14 @@ on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version, e.g. 1.1.0 (tag v<version> is created)"
+        required: true
+        default: "1.1.0"
+
+env:
+  TAG: ${{ github.event_name == 'workflow_dispatch' && format('v{0}', inputs.version) || github.ref_name }}
 
 permissions:
   contents: write
@@ -13,6 +21,14 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Create the release tag (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f $env:TAG
+          git push -f origin $env:TAG
 
       - uses: actions/setup-python@v5
         with:
@@ -45,21 +61,21 @@ jobs:
           Copy-Item $ffmpeg, $ffprobe bundled/ffmpeg/bin/
 
       - name: Package the app
-        run: pyinstaller --noconfirm --clean TubeGrab.spec
+        run: pyinstaller --noconfirm --clean ReelHaul.spec
 
       - name: Stage bundled tools into the build (installer layout)
         shell: pwsh
         run: |
-          Copy-Item bundled/ytdlp   dist/TubeGrab/ytdlp   -Recurse -Force
-          Copy-Item bundled/runtime dist/TubeGrab/runtime -Recurse -Force
-          Copy-Item bundled/ffmpeg  dist/TubeGrab/ffmpeg  -Recurse -Force
+          Copy-Item bundled/ytdlp   dist/ReelHaul/ytdlp   -Recurse -Force
+          Copy-Item bundled/runtime dist/ReelHaul/runtime -Recurse -Force
+          Copy-Item bundled/ffmpeg  dist/ReelHaul/ffmpeg  -Recurse -Force
 
       - name: Self-test the build
         shell: pwsh
         run: |
-          $p = Start-Process -FilePath "dist\TubeGrab\TubeGrab.exe" -ArgumentList "--selftest" -PassThru -WindowStyle Hidden
+          $p = Start-Process -FilePath "dist\ReelHaul\ReelHaul.exe" -ArgumentList "--selftest" -PassThru -WindowStyle Hidden
           $p.WaitForExit(180000) | Out-Null
-          Get-Content "$env:APPDATA\TubeGrab\selftest.json" -ErrorAction SilentlyContinue
+          Get-Content "$env:APPDATA\ReelHaul\selftest.json" -ErrorAction SilentlyContinue
           if ($p.ExitCode -ne 0) { throw "selftest failed" }
 
       - name: Install Inno Setup
@@ -72,8 +88,8 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          Compress-Archive -Path "dist\TubeGrab\TubeGrab.exe" -DestinationPath signing-artifact.zip -Force
-          $setup = Get-ChildItem release/TubeGrab-Setup-*.exe | Select-Object -First 1
+          Compress-Archive -Path "dist\ReelHaul\ReelHaul.exe" -DestinationPath signing-artifact.zip -Force
+          $setup = Get-ChildItem release/ReelHaul-Setup-*.exe | Select-Object -First 1
           # add the setup to the artifact zip without dropping the app exe
           Add-Type -AssemblyName System.IO.Compression.FileSystem
           $zip = [IO.Compression.ZipFile]::Open("$PWD\signing-artifact.zip", "Update")
@@ -95,7 +111,7 @@ jobs:
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
-          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG || 'tubegrab' }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG || 'reelhaul' }}
           signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG || 'release-signing' }}
           github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
           wait-for-completion: true
@@ -109,10 +125,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $ErrorActionPreference = "Stop"
-          $setup = Get-ChildItem signed/TubeGrab-Setup-*.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+          $setup = Get-ChildItem signed/ReelHaul-Setup-*.exe -ErrorAction SilentlyContinue | Select-Object -First 1
           if (-not $setup) {
             Write-Host "::warning::No signed artifact (SignPath not configured?) - attaching unsigned build"
-            $setup = Get-ChildItem release/TubeGrab-Setup-*.exe | Select-Object -First 1
+            $setup = Get-ChildItem release/ReelHaul-Setup-*.exe | Select-Object -First 1
           }
           if (Test-Path signed) { Copy-Item signed/* release/ -Force }
-          gh release create "$env:GITHUB_REF_NAME" $setup.FullName --generate-notes --title "TubeGrab $env:GITHUB_REF_NAME"
+          gh release create "$env:TAG" $setup.FullName --generate-notes --title "ReelHaul $env:TAG"

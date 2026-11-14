@@ -1,7 +1,7 @@
-"""TubeGrab download engine.
+"""ReelHaul download engine.
 
 Drives the official standalone yt-dlp.exe binary from a subprocess. Using the
-official binary means a packaged TubeGrab can update itself with one command
+official binary means a packaged ReelHaul can update itself with one command
 (``yt-dlp --update``) and needs no Python on the target machine.
 """
 from __future__ import annotations
@@ -60,7 +60,7 @@ class DownloadCancelled(Exception):
 # ------------------------------------------------------------- environment --
 
 def packaged_dirs() -> list[str]:
-    """Folders that may hold bundled tools when TubeGrab runs as a frozen exe."""
+    """Folders that may hold bundled tools when ReelHaul runs as a frozen exe."""
     candidates: list[str] = []
     if getattr(sys, "frozen", False):
         meipass = getattr(sys, "_MEIPASS", "")
@@ -69,7 +69,7 @@ def packaged_dirs() -> list[str]:
         exe_dir = os.path.dirname(sys.executable)
         if exe_dir:
             candidates.append(exe_dir)
-            # A plain PyInstaller build (dist\TubeGrab) keeps the bundled tools
+            # A plain PyInstaller build (dist\ReelHaul) keeps the bundled tools
             # in the repo root next to dist\, so search two levels up too.
             parent = os.path.dirname(exe_dir)
             if parent:
@@ -125,7 +125,7 @@ def find_ffmpeg() -> Optional[str]:
 def detect_js_runtimes() -> dict:
     """Pick a JavaScript runtime for YouTube's challenge solving.
 
-    A runtime bundled with TubeGrab (deno.exe next to the app) is preferred so
+    A runtime bundled with ReelHaul (deno.exe next to the app) is preferred so
     4K/8K formats work on machines without any dev tools installed.
     """
     for folder in packaged_dirs():
@@ -328,7 +328,7 @@ def analyze(url: str, cookies_browser: str = "") -> dict:
     exe = find_ytdlp()
     if not exe:
         raise EngineError(
-            "The download engine (yt-dlp) is missing. Reinstall TubeGrab.", ""
+            "The download engine (yt-dlp) is missing. Reinstall ReelHaul.", ""
         )
 
     args = [
@@ -410,7 +410,7 @@ def fetch_thumbnail(url: str, size: tuple[int, int] = (356, 200)) -> Optional[Im
     import urllib.request
 
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 TubeGrab"})
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 ReelHaul"})
         with urllib.request.urlopen(req, timeout=10) as response:
             data = response.read()
         img = Image.open(io.BytesIO(data)).convert("RGB")
@@ -492,12 +492,12 @@ def download(
     exe = find_ytdlp()
     if not exe:
         raise EngineError(
-            "The download engine (yt-dlp) is missing. Reinstall TubeGrab.", ""
+            "The download engine (yt-dlp) is missing. Reinstall ReelHaul.", ""
         )
 
     outdir = os.path.abspath(options.outdir)
     os.makedirs(outdir, exist_ok=True)
-    tmpdir = tempfile.mkdtemp(prefix="tubegrab-")
+    tmpdir = tempfile.mkdtemp(prefix="reelhaul-")
     ffmpeg = options.ffmpeg_location or find_ffmpeg() or ""
     before = _snapshot(outdir)
 

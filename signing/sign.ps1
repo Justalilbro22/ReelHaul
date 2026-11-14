@@ -1,7 +1,7 @@
-# Signs TubeGrab's exe files if a code-signing certificate is available.
+# Signs ReelHaul's exe files if a code-signing certificate is available.
 #
 # Put the certificate at signing\cert.pfx and set the password once:
-#   setx TUBEGRAB_CERT_PASSWORD "your password"
+#   setx REELHAUL_CERT_PASSWORD "your password"
 # Alternatively install the certificate in the Windows user store and set
 # the subject in signing\subject.txt.
 param(
@@ -25,9 +25,9 @@ function Find-Signtool {
 
 $targets = @()
 if ($Stage -eq "app") {
-    $targets += Join-Path $root "dist\TubeGrab\TubeGrab.exe"
+    $targets += Join-Path $root "dist\ReelHaul\ReelHaul.exe"
 } else {
-    $targets += Get-ChildItem (Join-Path $root "release\TubeGrab-Setup-*.exe") -ErrorAction SilentlyContinue |
+    $targets += Get-ChildItem (Join-Path $root "release\ReelHaul-Setup-*.exe") -ErrorAction SilentlyContinue |
         Select-Object -ExpandProperty FullName
 }
 if (-not $targets) {
@@ -37,7 +37,7 @@ if (-not $targets) {
 
 $signtool = Find-Signtool
 $timeServers = @("http://timestamp.digicert.com", "http://timestamp.sectigo.com")
-$common = @("sign", "/fd", "SHA256", "/td", "SHA256", "/d", "TubeGrab - free 4K video & audio downloader")
+$common = @("sign", "/fd", "SHA256", "/td", "SHA256", "/d", "ReelHaul - free 4K video & audio downloader")
 
 $certPfx = Join-Path $root "signing\cert.pfx"
 $subjectFile = Join-Path $root "signing\subject.txt"
@@ -50,7 +50,7 @@ foreach ($target in $targets) {
     }
     $args = $null
     if (Test-Path $certPfx) {
-        $password = [Environment]::GetEnvironmentVariable("TUBEGRAB_CERT_PASSWORD")
+        $password = [Environment]::GetEnvironmentVariable("REELHAUL_CERT_PASSWORD")
         if (-not $password) {
             $password = Read-Host -Prompt "Password for cert.pfx"
         }
@@ -60,7 +60,7 @@ foreach ($target in $targets) {
         $args = $common + @("/n", $subject)
     } else {
         Write-Host "sign: no certificate found - skipping $([IO.Path]::GetFileName($target))"
-        Write-Host "      add signing\cert.pfx (+ setx TUBEGRAB_CERT_PASSWORD) or signing\subject.txt"
+        Write-Host "      add signing\cert.pfx (+ setx REELHAUL_CERT_PASSWORD) or signing\subject.txt"
         continue
     }
 

@@ -1,4 +1,4 @@
-"""Generate TubeGrab's icon and logo (run once, or after changing the design)."""
+"""Generate ReelHaul's icon and logo (run once, or after changing the design)."""
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter

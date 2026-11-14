@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-"""PyInstaller spec for TubeGrab (onedir, windowed)."""
+"""PyInstaller spec for ReelHaul (onedir, windowed)."""
 from PyInstaller.utils.hooks import collect_all
 
 datas = [("assets", "assets")]
@@ -33,7 +33,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name="TubeGrab",
+    name="ReelHaul",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -49,5 +49,5 @@ coll = COLLECT(
     a.datas,
     strip=False,
     upx=False,
-    name="TubeGrab",
+    name="ReelHaul",
 )

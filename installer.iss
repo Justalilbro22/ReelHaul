@@ -1,22 +1,22 @@
-; TubeGrab installer — dark branded, per-user, self-contained
+; ReelHaul installer — dark branded, per-user, self-contained
 ; Build: ISCC.exe installer.iss
 
-#define TubeGrabName "TubeGrab"
-#define TubeGrabVersion "1.0.0"
-#define TubeGrabPublisher "TubeGrab"
+#define ReelHaulName "ReelHaul"
+#define ReelHaulVersion "1.1.0"
+#define ReelHaulPublisher "ReelHaul"
 
 [Setup]
 AppId={{8F2C0E44-9D3B-4A61-8C57-1E5B9A7D2C36}}
-AppName={#TubeGrabName}
-AppVersion={#TubeGrabVersion}
-AppVerName={#TubeGrabName} {#TubeGrabVersion}
-AppPublisher={#TubeGrabPublisher}
-DefaultDirName={localappdata}\Programs\{#TubeGrabName}
+AppName={#ReelHaulName}
+AppVersion={#ReelHaulVersion}
+AppVerName={#ReelHaulName} {#ReelHaulVersion}
+AppPublisher={#ReelHaulPublisher}
+DefaultDirName={localappdata}\Programs\{#ReelHaulName}
 DisableDirPage=no
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 OutputDir=release
-OutputBaseFilename=TubeGrab-Setup-{#TubeGrabVersion}
+OutputBaseFilename=ReelHaul-Setup-{#ReelHaulVersion}
 SetupIconFile=assets\icon.ico
 WizardStyle=modern
 WizardImageFile=assets\installer_side.png
@@ -27,13 +27,13 @@ LZMAUseSeparateProcess=yes
 LZMADictionarySize=65536
 ArchitecturesAllowed=x64compatible
 LicenseFile=license.txt
-UninstallDisplayName={#TubeGrabName}
-UninstallDisplayIcon={app}\TubeGrab.exe
-VersionInfoVersion={#TubeGrabVersion}
-VersionInfoDescription={#TubeGrabName} installer
+UninstallDisplayName={#ReelHaulName}
+UninstallDisplayIcon={app}\ReelHaul.exe
+VersionInfoVersion={#ReelHaulVersion}
+VersionInfoDescription={#ReelHaulName} installer
 VersionInfoCopyright=Free & open source
-VersionInfoProductName={#TubeGrabName}
-VersionInfoProductVersion={#TubeGrabVersion}
+VersionInfoProductName={#ReelHaulName}
+VersionInfoProductVersion={#ReelHaulVersion}
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -43,7 +43,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; \
     GroupDescription: "{cm:AdditionalIcons}"
 
 [Files]
-Source: "dist\TubeGrab\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
+Source: "dist\ReelHaul\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
 Source: "bundled\ytdlp\yt-dlp.exe"; DestDir: "{app}\ytdlp"; Flags: ignoreversion
 Source: "bundled\ffmpeg\bin\ffmpeg.exe"; DestDir: "{app}\ffmpeg"; Flags: ignoreversion
 Source: "bundled\ffmpeg\bin\ffprobe.exe"; DestDir: "{app}\ffmpeg"; Flags: ignoreversion
@@ -52,13 +52,13 @@ Source: "README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "license.txt"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{autoprograms}\{#TubeGrabName}"; Filename: "{app}\TubeGrab.exe"; \
+Name: "{autoprograms}\{#ReelHaulName}"; Filename: "{app}\ReelHaul.exe"; \
     Comment: "Free 4K video & audio downloader"
-Name: "{autodesktop}\{#TubeGrabName}"; Filename: "{app}\TubeGrab.exe"; \
+Name: "{autodesktop}\{#ReelHaulName}"; Filename: "{app}\ReelHaul.exe"; \
     Tasks: desktopicon; Comment: "Free 4K video & audio downloader"
 
 [Run]
-Filename: "{app}\TubeGrab.exe"; Description: "{cm:LaunchProgram,{#TubeGrabName}}"; \
+Filename: "{app}\ReelHaul.exe"; Description: "{cm:LaunchProgram,{#ReelHaulName}}"; \
     Flags: nowait postinstall skipifsilent
 
 [Code]

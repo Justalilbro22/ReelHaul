@@ -1,6 +1,6 @@
-# TubeGrab code signing policy
+# ReelHaul code signing policy
 
-Every official binary release of TubeGrab is code-signed through the
+Every official binary release of ReelHaul is code-signed through the
 [SignPath Foundation](https://signpath.org) free code-signing program for
 open-source projects. This page is the project's published signing policy, as
 required by the Foundation.
@@ -9,8 +9,8 @@ required by the Foundation.
 
 | File | What it is |
 | --- | --- |
-| `TubeGrab-Setup-&lt;version&gt;.exe` | The installer (Inno Setup), signed |
-| `TubeGrab.exe` | The application executable, signed (also inside the installer) |
+| `ReelHaul-Setup-&lt;version&gt;.exe` | The installer (Inno Setup), signed |
+| `ReelHaul.exe` | The application executable, signed (also inside the installer) |
 
 Upstream third-party binaries (yt-dlp.exe, ffmpeg.exe, ffprobe.exe, deno.exe)
 are **not** signed with the project certificate. They are downloaded at build
@@ -27,7 +27,7 @@ unmodified inside the installer.
    - `yt-dlp.exe` — https://github.com/yt-dlp/yt-dlp/releases
    - `deno.exe` — https://github.com/denoland/deno/releases
    - `ffmpeg.exe` / `ffprobe.exe` — https://github.com/BtbN/FFmpeg-Builds/releases
-3. The build runs a self-test (`TubeGrab.exe --selftest`) which must pass
+3. The build runs a self-test (`ReelHaul.exe --selftest`) which must pass
    before any artifact is submitted for signing.
 4. A signing request is submitted to SignPath.io from the same workflow run
    using the official GitHub Actions integration; SignPath verifies that the
@@ -43,11 +43,13 @@ unmodified inside the installer.
   conditions in the SignPath project configuration).
 - All project files are under an OSI-approved MIT license (see `LICENSE`);
   the project contains no proprietary code and is not dual-licensed.
-- Every release on GitHub states whether it is signed; unsigned artifacts are
-  only published as workflow artifacts (never as releases).
+- Every release on GitHub states whether it is signed. Until the SignPath
+  Foundation project is approved, releases carry the unsigned build produced by
+  this same workflow; once approved, **only** signed installers are published
+  as releases.
 
 ## Verifying a download
 
-After installing, right-click `TubeGrab.exe` → *Properties* → *Digital
-Signatures* and confirm the signer is the **SignPath Foundation: TubeGrab**
+After installing, right-click `ReelHaul.exe` → *Properties* → *Digital
+Signatures* and confirm the signer is the **SignPath Foundation: ReelHaul**
 certificate.

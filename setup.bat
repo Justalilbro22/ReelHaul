@@ -2,7 +2,7 @@
 setlocal
 cd /d "%~dp0"
 echo.
-echo  TubeGrab setup
+echo  ReelHaul setup
 echo  --------------
 echo.
 
@@ -36,6 +36,6 @@ if errorlevel 1 (
 ".venv\Scripts\python.exe" make_assets.py >nul 2>nul
 
 echo.
-echo Done! Double-click TubeGrab.bat to start.
+echo Done! Double-click ReelHaul.bat to start.
 echo.
 pause

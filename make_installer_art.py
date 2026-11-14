@@ -66,7 +66,7 @@ def build_side() -> Image.Image:
     img.paste(logo, (36, 48), logo)
     draw = ImageDraw.Draw(img)
 
-    draw.text((36, 168), "TubeGrab", font=font(FONT_BOLD, 36), fill=TEXT)
+    draw.text((36, 168), "ReelHaul", font=font(FONT_BOLD, 36), fill=TEXT)
     draw.text((37, 214), "Free 4K & 8K video", font=font(FONT_REG, 17), fill=MUTED)
     draw.text((37, 236), "and audio downloader", font=font(FONT_REG, 17), fill=MUTED)
 

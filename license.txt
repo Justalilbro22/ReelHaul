@@ -1,5 +1,5 @@
-TubeGrab — free 4K video & audio downloader
-Copyright (c) 2026 TubeGrab contributors
+ReelHaul — free 4K video & audio downloader
+Copyright (c) 2026 ReelHaul contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -17,7 +17,7 @@ AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY.
 
 Fair use reminder
 -----------------
-TubeGrab is a front-end for the open-source yt-dlp project. Download only
+ReelHaul is a front-end for the open-source yt-dlp project. Download only
 material you own or have permission to save, and respect the terms of service
 of the sites you use it with.
 

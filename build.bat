@@ -3,7 +3,7 @@ setlocal
 cd /d "%~dp0"
 
 echo.
-echo  TubeGrab release build
+echo  ReelHaul release build
 echo  ----------------------
 echo.
 
@@ -19,7 +19,7 @@ echo Refreshing assets...
 ".venv\Scripts\python.exe" make_installer_art.py
 
 echo Packaging the app...
-".venv\Scripts\pyinstaller.exe" --noconfirm --clean TubeGrab.spec
+".venv\Scripts\pyinstaller.exe" --noconfirm --clean ReelHaul.spec
 if errorlevel 1 (
     echo PyInstaller failed.
     exit /b 1
@@ -34,7 +34,7 @@ if not exist "%ISCC%" (
     echo.
     echo Inno Setup 6 is needed to build the installer:
     echo     winget install -e --id JRSoftware.InnoSetup
-    echo The packaged app is still ready in dist\TubeGrab\.
+    echo The packaged app is still ready in dist\ReelHaul\.
     exit /b 1
 )
 
@@ -46,7 +46,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "signing\sign.ps1" -Stage se
 if errorlevel 1 exit /b 1
 
 echo.
-echo Done! Installer: release\TubeGrab-Setup-*.exe
-echo Standalone app:  dist\TubeGrab\TubeGrab.exe
+echo Done! Installer: release\ReelHaul-Setup-*.exe
+echo Standalone app:  dist\ReelHaul\ReelHaul.exe
 echo.
 pause

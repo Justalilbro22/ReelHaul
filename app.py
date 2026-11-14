@@ -1,4 +1,4 @@
-"""TubeGrab — a free 4K/8K video and audio downloader for Windows.
+"""ReelHaul — a free 4K/8K video and audio downloader for Windows.
 
 A friendly desktop front-end for yt-dlp. No accounts, no ads, no limits.
 """
@@ -24,12 +24,24 @@ from tkinter import filedialog, messagebox
 
 import engine
 
-APP_NAME = "TubeGrab"
+APP_NAME = "ReelHaul"
 BASE_DIR = Path(__file__).resolve().parent
 ASSETS = BASE_DIR / "assets"
-DATA_DIR = Path(os.environ.get("APPDATA") or Path.home()) / "TubeGrab"
+DATA_DIR = Path(os.environ.get("APPDATA") or Path.home()) / "ReelHaul"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 SETTINGS_FILE = DATA_DIR / "settings.json"
+
+if os.name == "nt":
+    try:
+        import ctypes
+
+        # Claim a Windows AppUserModelID so the taskbar shows the app's own
+        # icon instead of the Python logo when running from source.
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+            f"Justalilbro22.{APP_NAME}"
+        )
+    except Exception:  # noqa: BLE001
+        pass
 
 # ---------------------------------------------------------------- palette ---
 BG = "#0A0C11"
@@ -62,7 +74,7 @@ HEIGHT_LABELS = {
 }
 
 DEFAULT_SETTINGS = {
-    "outdir": str(Path.home() / "Downloads" / "TubeGrab"),
+    "outdir": str(Path.home() / "Downloads" / "ReelHaul"),
     "container": "MP4",
     "cookies": "Off",
     "subs": False,
@@ -75,11 +87,11 @@ DEFAULT_SETTINGS = {
     "geometry": "",
 }
 
-log = logging.getLogger("tubegrab")
+log = logging.getLogger("reelhaul")
 
 
 def setup_logging() -> None:
-    handler = logging.FileHandler(DATA_DIR / "tubegrab.log", encoding="utf-8")
+    handler = logging.FileHandler(DATA_DIR / "reelhaul.log", encoding="utf-8")
     handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
     log.addHandler(handler)
     log.setLevel(logging.INFO)
@@ -157,7 +169,7 @@ class Job:
     last_ui: float = 0.0
 
 
-class TubeGrab(ctk.CTk):
+class ReelHaul(ctk.CTk):
     def __init__(self) -> None:
         ctk.set_appearance_mode("dark")
         super().__init__(fg_color=BG)
@@ -730,7 +742,7 @@ class TubeGrab(ctk.CTk):
 
     def _current_options(self) -> engine.DownloadOptions:
         outdir = self.folder_var.get().strip().strip('"') or str(
-            Path.home() / "Downloads" / "TubeGrab"
+            Path.home() / "Downloads" / "ReelHaul"
         )
         self.folder_var.set(outdir)
         options = engine.DownloadOptions(
@@ -1303,7 +1315,7 @@ class TubeGrab(ctk.CTk):
         self._set_status(f"yt-dlp {new_version} installed.")
         if messagebox.askyesno(
             "Engine updated",
-            f"yt-dlp {new_version} is installed.\nRestart TubeGrab now to use it?",
+            f"yt-dlp {new_version} is installed.\nRestart ReelHaul now to use it?",
             parent=self,
         ):
             self._restart()
@@ -1322,7 +1334,7 @@ class TubeGrab(ctk.CTk):
         active = [j for j in self.jobs if j.status in ("Queued", "Downloading")]
         if active:
             if not messagebox.askyesno(
-                "Quit TubeGrab?",
+                "Quit ReelHaul?",
                 f"{len(active)} download(s) are still running. Quit anyway?",
                 parent=self,
             ):
@@ -1391,14 +1403,14 @@ def main() -> int:
     if "--selftest" in sys.argv:
         return run_selftest()
     try:
-        TubeGrab().run()
+        ReelHaul().run()
         return 0
     except Exception:  # noqa: BLE001 - last resort for a windowless launcher
-        log.exception("TubeGrab crashed")
+        log.exception("ReelHaul crashed")
         try:
             messagebox.showerror(
-                "TubeGrab crashed",
-                "Something went wrong while starting TubeGrab.\n\n"
+                "ReelHaul crashed",
+                "Something went wrong while starting ReelHaul.\n\n"
                 + traceback.format_exc(limit=4),
             )
         except Exception:  # noqa: BLE001
