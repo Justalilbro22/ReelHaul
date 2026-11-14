@@ -1,0 +1,111 @@
+name: build-and-sign
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pyinstaller
+
+      - name: Refresh assets
+        run: |
+          python make_assets.py
+          python make_installer_art.py
+
+      - name: Fetch bundled tools (yt-dlp, deno, ffmpeg)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          New-Item bundled/ytdlp, bundled/runtime, bundled/ffmpeg/bin -ItemType Directory -Force | Out-Null
+          Invoke-WebRequest "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -OutFile bundled/ytdlp/yt-dlp.exe
+          Invoke-WebRequest "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-pc-windows-msvc.zip" -OutFile deno.zip
+          Expand-Archive deno.zip -DestinationPath bundled/runtime -Force
+          Remove-Item deno.zip
+          Invoke-WebRequest "https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip" -OutFile ffmpeg.zip
+          Expand-Archive ffmpeg.zip -DestinationPath ffmpeg_unpacked -Force
+          Remove-Item ffmpeg.zip
+          $ffmpeg = Get-ChildItem ffmpeg_unpacked -Recurse -Filter ffmpeg.exe | Select-Object -First 1 -ExpandProperty FullName
+          $ffprobe = Get-ChildItem ffmpeg_unpacked -Recurse -Filter ffprobe.exe | Select-Object -First 1 -ExpandProperty FullName
+          Copy-Item $ffmpeg, $ffprobe bundled/ffmpeg/bin/
+
+      - name: Package the app
+        run: pyinstaller --noconfirm --clean TubeGrab.spec
+
+      - name: Self-test the build
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath "dist\TubeGrab\TubeGrab.exe" -ArgumentList "--selftest" -PassThru -WindowStyle Hidden
+          $p.WaitForExit(180000) | Out-Null
+          Get-Content "$env:APPDATA\TubeGrab\selftest.json" -ErrorAction SilentlyContinue
+          if ($p.ExitCode -ne 0) { throw "selftest failed" }
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y --no-progress
+
+      - name: Build installer
+        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss'
+
+      - name: Zip signing artifact
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          Compress-Archive -Path "dist\TubeGrab\TubeGrab.exe" -DestinationPath signing-artifact.zip -Force
+          $setup = Get-ChildItem release/TubeGrab-Setup-*.exe | Select-Object -First 1
+          # add the setup to the artifact zip without dropping the app exe
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [IO.Compression.ZipFile]::Open("$PWD\signing-artifact.zip", "Update")
+          [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $setup.FullName, $setup.Name) | Out-Null
+          $zip.Dispose()
+          Get-ChildItem signing-artifact.zip | Select-Object Name, Length
+
+      - name: Upload unsigned artifact
+        id: unsigned
+        uses: actions/upload-artifact@v7
+        with:
+          name: signing-artifact
+          path: signing-artifact.zip
+
+      - name: Submit signing request to SignPath
+        id: sign
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG || 'tubegrab' }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG || 'release-signing' }}
+          github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: "1800"
+          output-artifact-directory: signed
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $setup = Get-ChildItem signed/TubeGrab-Setup-*.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $setup) {
+            Write-Host "::warning::No signed artifact (SignPath not configured?) - attaching unsigned build"
+            $setup = Get-ChildItem release/TubeGrab-Setup-*.exe | Select-Object -First 1
+          }
+          if (Test-Path signed) { Copy-Item signed/* release/ -Force }
+          gh release create "$env:GITHUB_REF_NAME" $setup.FullName --generate-notes --title "TubeGrab $env:GITHUB_REF_NAME"

@@ -1,0 +1,117 @@
+; TubeGrab installer — dark branded, per-user, self-contained
+; Build: ISCC.exe installer.iss
+
+#define TubeGrabName "TubeGrab"
+#define TubeGrabVersion "1.0.0"
+#define TubeGrabPublisher "TubeGrab"
+
+[Setup]
+AppId={{8F2C0E44-9D3B-4A61-8C57-1E5B9A7D2C36}}
+AppName={#TubeGrabName}
+AppVersion={#TubeGrabVersion}
+AppVerName={#TubeGrabName} {#TubeGrabVersion}
+AppPublisher={#TubeGrabPublisher}
+DefaultDirName={localappdata}\Programs\{#TubeGrabName}
+DisableDirPage=no
+DisableProgramGroupPage=yes
+PrivilegesRequired=lowest
+OutputDir=release
+OutputBaseFilename=TubeGrab-Setup-{#TubeGrabVersion}
+SetupIconFile=assets\icon.ico
+WizardStyle=modern
+WizardImageFile=assets\installer_side.png
+WizardSmallImageFile=assets\installer_small.png
+Compression=lzma2/max
+SolidCompression=yes
+LZMAUseSeparateProcess=yes
+LZMADictionarySize=65536
+ArchitecturesAllowed=x64compatible
+LicenseFile=license.txt
+UninstallDisplayName={#TubeGrabName}
+UninstallDisplayIcon={app}\TubeGrab.exe
+VersionInfoVersion={#TubeGrabVersion}
+VersionInfoDescription={#TubeGrabName} installer
+VersionInfoCopyright=Free & open source
+VersionInfoProductName={#TubeGrabName}
+VersionInfoProductVersion={#TubeGrabVersion}
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; \
+    GroupDescription: "{cm:AdditionalIcons}"
+
+[Files]
+Source: "dist\TubeGrab\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
+Source: "bundled\ytdlp\yt-dlp.exe"; DestDir: "{app}\ytdlp"; Flags: ignoreversion
+Source: "bundled\ffmpeg\bin\ffmpeg.exe"; DestDir: "{app}\ffmpeg"; Flags: ignoreversion
+Source: "bundled\ffmpeg\bin\ffprobe.exe"; DestDir: "{app}\ffmpeg"; Flags: ignoreversion
+Source: "bundled\runtime\deno.exe"; DestDir: "{app}\runtime"; Flags: ignoreversion
+Source: "README.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "license.txt"; DestDir: "{app}"; Flags: ignoreversion
+
+[Icons]
+Name: "{autoprograms}\{#TubeGrabName}"; Filename: "{app}\TubeGrab.exe"; \
+    Comment: "Free 4K video & audio downloader"
+Name: "{autodesktop}\{#TubeGrabName}"; Filename: "{app}\TubeGrab.exe"; \
+    Tasks: desktopicon; Comment: "Free 4K video & audio downloader"
+
+[Run]
+Filename: "{app}\TubeGrab.exe"; Description: "{cm:LaunchProgram,{#TubeGrabName}}"; \
+    Flags: nowait postinstall skipifsilent
+
+[Code]
+const
+  ClBg    = $110C0A;   // #0A0C11
+  ClCard  = $1D1511;   // #11151D
+  ClText  = $F9F2EE;   // #EEF2F9
+  ClMuted = $A6938A;   // #8A93A6
+
+procedure RecolorControls(Parent: TWinControl);
+var
+  I: Integer;
+  C: TControl;
+begin
+  for I := 0 to Parent.ControlCount - 1 do
+  begin
+    C := Parent.Controls[I];
+    if C is TNewStaticText then
+      TNewStaticText(C).Font.Color := ClText
+    else if C is TLabel then
+      TLabel(C).Font.Color := ClText
+    else if C is TNewCheckBox then
+      TNewCheckBox(C).Font.Color := ClText
+    else if C is TNewCheckListBox then
+      TNewCheckListBox(C).Font.Color := ClText
+    else if C is TPanel then
+      TPanel(C).Color := ClBg
+    else if C is TEdit then
+    begin
+      TEdit(C).Color := ClCard;
+      TEdit(C).Font.Color := ClText;
+    end
+    else if C is TRichEditViewer then
+    begin
+      TRichEditViewer(C).Color := ClCard;
+      TRichEditViewer(C).Font.Color := ClText;
+    end;
+
+    if C is TWinControl then
+      RecolorControls(TWinControl(C));
+  end;
+end;
+
+procedure InitializeWizard();
+begin
+  WizardForm.Color := ClBg;
+  WizardForm.MainPanel.Color := ClBg;
+  WizardForm.InnerPage.Color := ClBg;
+  WizardForm.PageNameLabel.Font.Color := ClText;
+  WizardForm.PageDescriptionLabel.Font.Color := ClMuted;
+  WizardForm.DirEdit.Color := ClCard;
+  WizardForm.DirEdit.Font.Color := ClText;
+  WizardForm.LicenseMemo.Color := ClCard;
+  WizardForm.LicenseMemo.Font.Color := ClText;
+  RecolorControls(WizardForm);
+end;

@@ -1,0 +1,22 @@
+# Local environment & outputs
+.venv/
+build/
+dist/
+release/
+__pycache__/
+*.pyc
+
+# Third-party binaries (fetched by CI at build time, see .github/workflows)
+bundled/
+
+# Secrets — never commit
+signing/cert.pfx
+signing/subject.txt
+
+# Scratch / logs
+test-out*/
+test-mp3*/
+test-cancel/
+run.out
+run.err
+*.log
