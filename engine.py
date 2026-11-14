@@ -207,12 +207,16 @@ _BOT_MARKERS = (
     "sign in to confirm",
     "use --cookies",
     "cookies-from-browser",
+    "sign-in check",
+    "signed-in browser",
 )
 
 
 def is_bot_check(exc_or_text: Union[BaseException, str]) -> bool:
     """True when YouTube refused us because of a datacenter/anonymous IP."""
     raw = _clean_error(exc_or_text) if isinstance(exc_or_text, BaseException) else str(exc_or_text)
+    if isinstance(exc_or_text, EngineError) and exc_or_text.detail:
+        raw += " " + exc_or_text.detail
     low = strip_ansi(raw).lower()
     return any(marker in low for marker in _BOT_MARKERS)
 
